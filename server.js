@@ -6,6 +6,12 @@ var express = require('express');
 var app = express();
 var url = require('url');
 
+var mongodb = require('mongodb');
+var mongodburl = 'mongodb://localhost:27017/imagesearch';
+//Note: when using localhost, just comment out the line below and use the line above...
+//var mongodburl = process.env.SECRET;
+
+
 //var googleImgSearch = require('free-google-image-search');
 //var imageSearch = require('node-google-image-search');
 //var search = require('image-search'); 
@@ -43,10 +49,41 @@ console.log('in if 1');
   	var searchQuery = pathname.substring(17, pathname.length);
   	//Note: might need to turn this into an int as it is probably a string from the url...
   	var offset = req.query.offset;
-    
+   // var timestamp = new Date().toDateString();
+    var timestamp = new Date();
+    console.log('timestamp: ' + timestamp);
+    //console.log('new date: ' + timestamp.getTime());
+
+
+
+
+    mongodb.MongoClient.connect(mongodburl, function (err, db) {
+    	if (err) {
+      		console.log('Unable to connect to the mongoDB server. Error:', err);
+      		output = {'error': "couldn't connect to MongoDB"};
+    	} 
+    	else {
+      		//Successfully connected to MongoDB
+      		console.log('Connected to MongoDB');
+      		//console.log(db);
+
+      		var collection = db.db('imagesearch');
+      		
+    	
+    		collection.collection('searches').insert(
+            	{ 'term' : searchQuery, 'when': timestamp}, 
+            	function(err, documents) {
+            	console.log(err);
+            	if (err) throw err;
+            	//Close connection
+            	db.close();  
+         	});
+		}
+    });  
+
     
     //console.log(req);
-  /*
+ /*
     var output = {
       "1":{ "test": "this is test",
             "testNext" : "this is the second item"},
@@ -60,8 +97,6 @@ console.log('in if 1');
       rating: 'g'
     }, function (err, results) {
       // results contains gif data! 
-     
-      //if (err) throw err;
 
      if (err) {
      	output = {'there was an error' : err};
@@ -95,10 +130,59 @@ console.log('in if 1');
  else if (pathname.substring(0, 23) == "/api/latest/imagesearch"){
  	console.log('in else if 2');
 
- 	output={
- 		'note' : 'Latest Imagesearch' 
- 	};
- 	res.send(output);
+ 	//Find and display the 10 latest records
+//db.searches.find().sort({when:-1}).limit(10);
+
+ mongodb.MongoClient.connect(mongodburl, function (err, db) {
+    	if (err) {
+      		console.log('Unable to connect to the mongoDB server. Error:', err);
+      		output = {'error': "couldn't connect to MongoDB"};
+    	} 
+    	else {
+      		//Successfully connected to MongoDB
+      		console.log('Connected to MongoDB');
+      		//output={'note' : 'Latest Imagesearch'};
+      		//console.log(db);
+
+      		var collection = db.db('imagesearch');
+      		
+    		var results = collection.collection('searches').find().sort({when:-1}).limit(10);
+    		//console.log('results' + JSON.stringify(results));
+    		/*
+    		results.forEach(function(result) {
+            	console.log(result);
+        	});
+			*/
+
+			console.log(results);
+
+			for (var i=0; i < results.length; i++){
+				console.log(results[i]);
+				output[i] = {'term':results[i].term, 'when' : results[i].when};
+        
+			}
+
+			console.log(output);
+
+			res.send(output);
+    		//Close connection
+            db.close(); 
+
+    		/*
+    		collection.collection('searches').insert(
+            	{ 'term' : searchQuery, 'when': timestamp}, 
+            	function(err, documents) {
+            	console.log(err);
+            	if (err) throw err;
+            	//Close connection
+            	db.close();  
+         	});
+         	*/
+		}
+    });  
+
+ 	
+ 	
  }      
  else {
 
