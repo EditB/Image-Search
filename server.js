@@ -146,27 +146,97 @@ console.log('in if 1');
 
       		var collection = db.db('imagesearch');
       		
-    		var results = collection.collection('searches').find().sort({when:-1}).limit(10);
+    		//var results = collection.collection('searches').find().sort({when:-1}).limit(10).toArray();
     		//console.log('results' + JSON.stringify(results));
-    		/*
-    		results.forEach(function(result) {
-            	console.log(result);
+    		//console.log('results: ' + results);
+    		
+    		var results = collection.collection('searches').find().sort({when:-1}).limit(10).toArray(function(err, docs){
+    			if (err) throw err;
+    			console.log(docs);
+
+    			//Note: this is working!!
+    			//Go through the array (docs) and do output, then res.send(output)!
+    			for (var j=0; j < docs.length; j++){
+    				//Note: not sure if this below works; need to test!
+    				output[j] = {'term':docs[j]['term'], 'when' : docs[j]['when']};
+    				console.log(output[j]);
+    			}
+    			res.send(output);
+    			db.close;
+    		});
+
+
+    		
+    		//console.log(results.length);
+    		//console.log(results);
+    		//Note: results.length is undefined!
+			//console.log(results.length);
+    		//var counter = 0;
+    		//var results = collection.collection('searches').find().sort({when:-1}).limit(10);
+    		//console.log('created results');
+    		
+    		
+    		//console.log(results.count());
+/*    		
+results.count()
+    .then(function(numItems) {
+      console.log(numItems); // Use this to debug
+      callback(numItems){
+
+      	    results.forEach(function(err, result) {
+
+    			if (err) throw err;
+
+				var term = result.term;
+				var when = result.when;
+    			output[counter] = {'term':term, 'when' : when};
+    			console.log(output);
+    			//console.log(result);
+            	//console.log(result.term);
+            	//console.log(result.when);
+            	counter++;
+
+            	if (counter == numItems){
+            		console.log('finished loop');
+            		console.log(output);
+            	}
+        	});
+
+
+      };
+    })
+
+    		results.forEach(function(err, result) {
+
+    			if (err) throw err;
+
+				var term = result.term;
+				var when = result.when;
+    			output[counter] = {'term':term, 'when' : when};
+    			console.log(output);
+    			//console.log(result);
+            	//console.log(result.term);
+            	//console.log(result.when);
+            	counter++;
+
+
         	});
 			*/
+    		//console.log('after forEach');
 
-			console.log(results);
-
+			/*
 			for (var i=0; i < results.length; i++){
-				console.log(results[i]);
+				console.log('i:' + i);
 				output[i] = {'term':results[i].term, 'when' : results[i].when};
         
 			}
+			*/
+			//console.log(output);
+			
 
-			console.log(output);
-
-			res.send(output);
+			//res.send(output);
     		//Close connection
-            db.close(); 
+            //db.close(); 
 
     		/*
     		collection.collection('searches').insert(
