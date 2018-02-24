@@ -7,9 +7,9 @@ var app = express();
 var url = require('url');
 
 var mongodb = require('mongodb');
-var mongodburl = 'mongodb://localhost:27017/imagesearch';
+//var mongodburl = 'mongodb://localhost:27017/imagesearch';
 //Note: when using localhost, just comment out the line below and use the line above...
-//var mongodburl = process.env.SECRET;
+var mongodburl = process.env.SECRET;
 
 
 var giphy = require('giphy-api')();
@@ -40,10 +40,10 @@ app.use(function(req, res){
       		console.log('Connected to MongoDB');
       		//console.log(db);
 
-      		var collection = db.db('imagesearch');
       		
-    	
-    		collection.collection('searches').insert(
+      		var collection = db.collection('searches');
+        
+          collection.insert(
             	{ 'term' : searchQuery, 'when': timestamp}, 
             	function(err, documents) {
             	console.log(err);
@@ -67,7 +67,7 @@ app.use(function(req, res){
      	else{
 
       		for (var i=0; i<results.data.length; i++) {
-				//We need to ouput: url, snippet, thumbnail (which is another url) and context 
+				//We need to ouput: url, snippet, thumbnail (which is another url) and context, but this api doesn't return them; just use what we have. 
         	 	var newtitle = results.data[i].title;
         		var newurl = results.data[i].url;
         		var newsource = results.data[i].source;
@@ -89,10 +89,10 @@ app.use(function(req, res){
       		//Successfully connected to MongoDB
       		console.log('Connected to MongoDB');
 
-      		var collection = db.db('imagesearch');
-    		
-    		var results = collection.collection('searches').find().sort({when:-1}).limit(10).toArray(function(err, docs){
-    			if (err) throw err;
+          var collection = db.collection('searches');
+          var results = collection.find().sort({when:-1}).limit(10).toArray(function(err, docs){
+            
+          if (err) throw err;
 
     			//Note: this is working!!
     			//Go through the array (docs) and do output, then res.send(output)!
